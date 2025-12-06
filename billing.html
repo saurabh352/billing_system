@@ -5,55 +5,128 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Billing System - Narayan Kirana Store</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: linear-gradient(to right, #fceabb, #f8b500); }
-    .container { max-width: 1000px; margin: 20px auto; background: #fff; padding: 20px 25px; border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-    .header-top { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; color: #555; }
-    h1 { text-align: center; margin: 6px 0; color: #ff6f61; font-size: 32px; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
-    h2 { text-align: center; color: #007bff; margin: 12px 0; text-decoration: underline; }
-    h3 { text-align: center; margin: 4px 0; color: #555; font-size: 16px; }
-    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
-    label { min-width: 60px; font-weight: bold; color: #333; }
-    input, select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
-    input:focus, select:focus { outline: none; border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,0.5); }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 13px; }
-    table, th, td { border: 1px solid #ccc; }
-    th { background: linear-gradient(to right, #4facfe, #00f2fe); color: #fff; font-size: 14px; }
-    th, td { padding: 8px; text-align: center; }
-    .btn { padding: 6px 12px; cursor: pointer; border: none; border-radius: 6px; transition: 0.3s; font-weight: bold; font-size: 13px; }
-    .btn:hover { opacity: 0.85; }
-    .removeBtn { background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
-    .removeBtn:hover { background-color: #c0392b; }
-    .actions { margin-top: 12px; display:flex; gap:10px; justify-content:flex-end; flex-wrap: wrap; }
+    :root{
+      --brand:#ff6f61;--primary:#007bff;--accent:#17a2b8;--success:#28a745;--warning:#f8b500;--purple:#6f42c1;--danger:#e74c3c;--ink:#333
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:linear-gradient(to right,#fceabb,#f8b500)}
+    .container{max-width:1100px;margin:20px auto;background:#fff;padding:20px 22px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.15)}
+    .header-top{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin-bottom:6px;color:#555;flex-wrap:wrap}
+    h1{text-align:center;margin:6px 0;color:var(--brand);font-size:32px;text-shadow:1px 1px 3px rgba(0,0,0,.2)}
+    h2{text-align:center;color:var(--primary);margin:10px 0;text-decoration:underline}
+    h3{margin:8px 0;color:#555;font-size:16px}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+    label{min-width:60px;font-weight:600;color:var(--ink)}
+    input,select{padding:8px;border:1px solid #ccc;border-radius:6px}
+    input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 5px rgba(0,123,255,.5)}
+    table{width:100%;border-collapse:collapse;margin-top:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:13px}
+    table,th,td{border:1px solid #ddd}
+    th{background:linear-gradient(to right,#4facfe,#00f2fe);color:#fff;font-size:13px}
+    th,td{padding:8px;text-align:center}
+    .btn{padding:7px 12px;cursor:pointer;border:none;border-radius:8px;transition:.2s;font-weight:700;font-size:13px}
+    .btn:hover{opacity:.9;transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .removeBtn{background-color:var(--danger);color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px}
+    .removeBtn:hover{background-color:#c0392b}
+    .actions{margin-top:12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+    .pill{background:#f1f8ff;border:1px dashed #b5d9ff;padding:10px;border-radius:10px}
+    .totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin-top:10px}
+    .totals .card{border:1px solid #eee;border-radius:10px;padding:10px;background:#fafafa}
+    .right{text-align:right}
+    .muted{color:#777}
 
-    @media(max-width: 768px) {
-      .row { flex-direction: column; align-items: flex-start; }
-      input, select { width: 100%; }
-      .actions { justify-content: center; }
+    @media(max-width:768px){
+      .row{flex-direction:column;align-items:flex-start}
+      input,select{width:100%}
+      .actions{justify-content:center}
     }
 
-    @media print {
-      body { background: #fff; margin: 0; }
-      .no-print, .add-item-row, .action-col, .header-top a { display: none; }
-      .container { width: 210mm; height: 297mm; padding: 15mm; box-sizing: border-box; }
-      table { font-size: 11px; page-break-inside: avoid; }
-      tr { page-break-inside: avoid; page-break-after: auto; }
-      .print-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 10px; }
+    /* ---------- PRINT LAYOUT ---------- */
+    @media print{
+      body{background:#fff;margin:0}
+      .no-print,.add-item-row,.action-col,.header-top a,.actions{display:none!important}
+      .container{width:210mm;min-height:297mm;padding:12mm 14mm}
+      table{font-size:11px}
+      tr{page-break-inside:avoid}
+      #invoiceHeader{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px}
+      .totals .card{border:none;background:#fff;padding:0}
+    }
+
+    /* Print-only area */
+    #simplePrint{display:none}
+    @media print{
+      #simplePrint{display:block}
+      /* Hide everything except simplePrint */
+      #billRoot > *:not(#simplePrint){display:none !important}
+      body{background:#fff !important}
+      .container{box-shadow:none !important;padding:0;margin:0}
+
+      #simplePrint{font-family:Arial, Helvetica, sans-serif;font-size:11px;padding:6mm 6mm}
+      /* Header arranged left(shop) / right(customer) */
+      #simplePrint .print-header{
+        display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap
+      }
+      #simplePrint .left{max-width:55%}
+      #simplePrint .right{max-width:45%; text-align:right}
+      #simplePrint .muted{color:#333}
+
+      #simplePrint table{width:100%;border-collapse:collapse;font-size:10px;margin-top:6mm;table-layout:auto}
+      #simplePrint th,#simplePrint td{border:1px solid #000;padding:3px;text-align:center;vertical-align:top}
+      #simplePrint th{font-weight:700}
+      /* Keep header/footer repeating across pages */
+      #simplePrint thead{display:table-header-group;}
+      #simplePrint tfoot{display:table-footer-group;}
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="billRoot">
+    <!-- SIMPLE PRINT-ONLY LAYOUT -->
+    <div id="simplePrint">
+      <div class="print-header">
+        <!-- Top-left: Shop details -->
+        <div class="left">
+          <div><strong>Narayan Kirana Store</strong></div>
+          <div>Address: Main Trimuhani, Gyanpur, Bhadohi</div>
+          <div>Mobile: 9935113436, 9935113340</div>
+          <div>GST No: 09CXYPD4494C1ZZ</div>
+        </div>
+        <!-- Top-right: Customer & bill meta -->
+        <div class="right">
+          <div id="pCust" class="muted"></div>
+          <div id="pDateInv" class="muted"></div>
+        </div>
+      </div>
+      <div id="pTableWrap"></div>
+    </div>
+
+    <!-- Normal screen header -->
     <div class="header-top">
-      <div>GST No: 09CXYPD4494C1ZZ | Address: Main Trimuhani, Gyanpur, Bhadohi</div>
+      <div>GST No: <strong>09CXYPD4494C1ZZ</strong> | Address: Main Trimuhani, Gyanpur, Bhadohi</div>
       <div>Mobile: 9935113436, 9935113340</div>
     </div>
     <h1>Narayan Kirana Store</h1>
     <h2>Billing System</h2>
 
-    <div class="row" style="background: #f1f8ff; padding: 12px 10px; border-radius: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
-      <div style="flex:1; display:flex; gap:8px; align-items:center;"><label for="custName">Name:</label><input type="text" id="custName" aria-label="Customer Name" /></div>
-      <div style="flex:2; display:flex; gap:8px; align-items:center;"><label for="custAddress">Address:</label><input type="text" id="custAddress" aria-label="Customer Address" style="flex:1;" /></div>
-      <div style="flex:1; display:flex; gap:8px; align-items:center;"><label for="billDate">Date:</label><input type="date" id="billDate" aria-label="Bill Date" /></div>
+    <div id="invoiceHeader" class="pill">
+      <div class="row" style="margin-bottom:0">
+        <div style="flex:1;display:flex;gap:8px;align-items:center">
+          <label for="custName">Name:</label>
+          <input type="text" id="custName" aria-label="Customer Name" />
+        </div>
+        <div style="flex:2;display:flex;gap:8px;align-items:center">
+          <label for="custAddress">Address:</label>
+          <input type="text" id="custAddress" aria-label="Customer Address" style="flex:1" />
+        </div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center">
+          <label for="billDate">Date:</label>
+          <input type="date" id="billDate" aria-label="Bill Date" />
+        </div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center">
+          <label for="invoiceNo">Invoice#</label>
+          <input type="text" id="invoiceNo" aria-label="Invoice Number" />
+        </div>
+      </div>
     </div>
 
     <h3>Add Item</h3>
@@ -61,17 +134,20 @@
       <label for="itemName">Item:</label>
       <input type="text" id="itemName" aria-label="Item Name" />
       <label for="qty">Qty:</label>
-      <input type="number" id="qty" min="0" step="any" style="width:100px;" aria-label="Quantity" />
+      <input type="number" id="qty" min="0" step="any" style="width:110px" aria-label="Quantity" />
       <select id="unit" aria-label="Unit">
         <option value="kg">Kg</option>
         <option value="gm">Gram</option>
         <option value="liter">Liter</option>
+        <option value="ml">ML</option>
         <option value="packet">Packet</option>
         <option value="piece">Piece</option>
       </select>
       <label for="rate">Rate:</label>
-      <input type="number" id="rate" min="0" step="any" style="width:120px;" aria-label="Rate" />
-      <button class="btn" onclick="addItem()" aria-label="Add Item" style="background-color:#007bff;color:white;">Add</button>
+      <input type="number" id="rate" min="0" step="any" style="width:120px" aria-label="Rate" placeholder="per unit" />
+      <label for="gst">GST %:</label>
+      <input type="number" id="gst" min="0" step="any" style="width:90px" aria-label="GST percent" placeholder="0/5/12/18/28" />
+      <button class="btn" id="addBtn" style="background:var(--primary);color:#fff">Add</button>
     </div>
 
     <table id="billTable" aria-label="Billing Table">
@@ -81,61 +157,347 @@
           <th>Item Name</th>
           <th>Quantity</th>
           <th>Rate</th>
-          <th>Total</th>
+          <th>GST %</th>
+          <th>Tax Amt</th>
+          <th>Line Total</th>
           <th class="action-col">Action</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
 
-    <div class="actions no-print">
-      <button class="btn" onclick="updateGrandTotal()" style="background:#28a745;color:white;">Calculate Total</button>
-      <button class="btn" onclick="window.print()" style="background:#17a2b8;color:white;">Print Bill</button>
-      <button class="btn" onclick="saveAsPDF()" style="background:#6f42c1;color:white;">Save as PDF</button>
+    <div class="totals">
+      <div class="card"><div class="muted">Subtotal</div><div class="right" id="subTotal">₹0.00</div></div>
+      <div class="card"><div class="muted">Total Tax</div><div class="right" id="taxTotal">₹0.00</div></div>
+      <div class="card"><div class="muted">Discount (₹)</div>
+        <input type="number" id="discount" min="0" step="any" value="0" style="width:100%" />
+      </div>
+      <div class="card"><div class="muted">Grand Total</div><div class="right" id="grandTotal">₹0.00</div></div>
     </div>
 
-    <h3>Total Amount: <span id="grandTotal">0</span></h3>
+    <div class="actions no-print">
+      <button class="btn" id="calcBtn" style="background:var(--success);color:#fff">Calculate Total</button>
+      <button class="btn" id="clearBtn" style="background:#999;color:#fff">Clear All</button>
+      <button class="btn" id="saveDraftBtn" style="background:var(--accent);color:#fff">Save Draft</button>
+      <button class="btn" id="loadDraftBtn" style="background:var(--warning);color:#222">Load Draft</button>
+      <button class="btn" id="csvBtn" style="background:#222;color:#fff">Export CSV</button>
+      <button class="btn" id="printBtn" onclick="printBill()" style="background:var(--accent);color:#fff" type="button">Print Bill</button>
+      <button class="btn" id="pdfBtn" style="background:var(--purple);color:#fff">Save as PDF</button>
+    </div>
+
+    <h3 class="right">Amount Payable: <span id="amountPayable">₹0.00</span></h3>
   </div>
 
   <script>
-    (function setDate() {
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      document.getElementById('billDate').value = `${yyyy}-${mm}-${dd}`;
+    const nfINR = new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'});
+
+    (function init(){
+      const d=new Date();
+      const yyyy=d.getFullYear();
+      const mm=String(d.getMonth()+1).padStart(2,'0');
+      const dd=String(d.getDate()).padStart(2,'0');
+      document.getElementById('billDate').value=`${yyyy}-${mm}-${dd}`;
+      document.getElementById('invoiceNo').value = genInvoiceNo();
+      bindEvents();
     })();
 
-    function addItem() {
-      const rows = document.querySelectorAll('#billTable tbody tr');
-      if (rows.length >= 100) { alert('Maximum 100 items allowed per bill.'); return; }
-      const name = document.getElementById('itemName').value.trim();
-      const qty = parseFloat(document.getElementById('qty').value);
-      const unit = document.getElementById('unit').value;
-      const rate = parseFloat(document.getElementById('rate').value);
-      if (!name || isNaN(qty) || isNaN(rate) || qty <= 0 || rate <= 0) { alert('Enter valid item, quantity, and rate'); return; }
-      const total = +(qty * rate).toFixed(2);
-      const row = document.createElement('tr');
-      row.innerHTML = `<td></td><td>${name}</td><td>${qty} ${unit}</td><td>${rate.toFixed(2)}</td><td>${total.toFixed(2)}</td><td class='action-col'><button class='removeBtn' onclick='removeItem(this)'>Remove</button></td>`;
-      document.querySelector('#billTable tbody').appendChild(row);
-      updateSerialNumbers(); updateGrandTotal();
-      document.getElementById('itemName').value = ''; document.getElementById('qty').value = ''; document.getElementById('rate').value = '';
+    function genInvoiceNo(){
+      const d=new Date();
+      const y=String(d.getFullYear()).slice(-2);
+      const m=String(d.getMonth()+1).padStart(2,'0');
+      const da=String(d.getDate()).padStart(2,'0');
+      const r=Math.floor(100+Math.random()*900);
+      return `INV-${y}${m}${da}-${r}`;
+    }
+
+    function bindEvents(){
+      document.getElementById('addBtn').addEventListener('click', addItem);
+      document.getElementById('rate').addEventListener('keypress', e=>{ if(e.key==='Enter') addItem(); });
+      document.getElementById('gst').addEventListener('keypress', e=>{ if(e.key==='Enter') addItem(); });
+      document.getElementById('calcBtn').addEventListener('click', updateTotals);
+      document.getElementById('discount').addEventListener('input', updateTotals);
+      document.getElementById('clearBtn').addEventListener('click', clearAll);
+      document.getElementById('csvBtn').addEventListener('click', exportCSV);
+      document.getElementById('pdfBtn').addEventListener('click', saveAsPDF);
+      document.getElementById('saveDraftBtn').addEventListener('click', saveDraft);
+      document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
+
+      // Keyboard shortcuts
+      window.addEventListener('keydown', (e)=>{
+        if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){e.preventDefault(); saveAsPDF();}
+        if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='p'){e.preventDefault(); printBill(); }
+      });
+    }
+
+    function addItem(){
+      const rows=document.querySelectorAll('#billTable tbody tr');
+      if(rows.length>=200){alert('Maximum 200 items allowed per bill.');return;}
+      const name=document.getElementById('itemName').value.trim();
+      const qty=parseFloat(document.getElementById('qty').value);
+      const unit=document.getElementById('unit').value;
+      const rate=parseFloat(document.getElementById('rate').value);
+      const gst=parseFloat(document.getElementById('gst').value||'0');
+
+      if(!name||isNaN(qty)||isNaN(rate)||qty<=0||rate<=0){alert('Enter valid item, quantity, and rate');return;}
+      if(gst<0){alert('GST% cannot be negative');return;}
+
+      const lineBase = qty*rate;
+      const taxAmt = +(lineBase * (gst/100)).toFixed(2);
+      const lineTotal = +(lineBase + taxAmt).toFixed(2);
+
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td></td>
+        <td>${escapeHtml(name)}</td>
+        <td>${qty} ${unit}</td>
+        <td>${rate.toFixed(2)}</td>
+        <td>${gst.toFixed(2)}</td>
+        <td>${taxAmt.toFixed(2)}</td>
+        <td>${lineTotal.toFixed(2)}</td>
+        <td class="action-col"><button class="removeBtn" onclick="removeItem(this)">Remove</button></td>`;
+      document.querySelector('#billTable tbody').appendChild(tr);
+      updateSerials();
+      updateTotals();
+      document.getElementById('itemName').value='';
+      document.getElementById('qty').value='';
+      document.getElementById('rate').value='';
+      document.getElementById('gst').value='';
       document.getElementById('itemName').focus();
     }
 
-    document.getElementById('rate').addEventListener('keypress', e => { if(e.key==='Enter') addItem(); });
-    function updateSerialNumbers(){ document.querySelectorAll('#billTable tbody tr').forEach((r,i)=>r.children[0].textContent=i+1); }
-    function removeItem(btn){ const row=btn.closest('tr'); if(!row) return; if(!confirm('Remove this item?')) return; row.remove(); updateSerialNumbers(); updateGrandTotal(); }
-    function updateGrandTotal(){ let total=0; document.querySelectorAll('#billTable tbody tr').forEach(r=>{ total+=parseFloat(r.children[4].textContent)||0; }); document.getElementById('grandTotal').textContent=total.toFixed(2); }
+    function escapeHtml(str){
+      return str.replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    function updateSerials(){
+      document.querySelectorAll('#billTable tbody tr').forEach((r,i)=>r.children[0].textContent=i+1);
+    }
+
+    function removeItem(btn){
+      const row=btn.closest('tr');
+      if(!row) return;
+      if(!confirm('Remove this item?')) return;
+      row.remove();
+      updateSerials();
+      updateTotals();
+    }
+
+    function getNumbers(){
+      let sub=0,tax=0,grand=0;
+      document.querySelectorAll('#billTable tbody tr').forEach(r=>{
+        const rate=parseFloat(r.children[3].textContent)||0;
+        const gst=parseFloat(r.children[4].textContent)||0;
+        const qtyUnit=r.children[2].textContent.trim();
+        const qty=parseFloat(qtyUnit.split(' ')[0])||0;
+        const base=qty*rate;
+        const t=base*(gst/100);
+        sub+=base; tax+=t; grand+=base+t;
+      });
+      const discount=parseFloat(document.getElementById('discount').value||'0');
+      if(discount>grand) return {sub,tax,grand:0,discount,net:0};
+      const net = Math.max(0, grand - discount);
+      return {sub,tax,grand,discount,net};
+    }
+
+    function updateTotals(){
+      const {sub,tax,grand,discount,net}=getNumbers();
+      document.getElementById('subTotal').textContent=nfINR.format(+sub.toFixed(2));
+      document.getElementById('taxTotal').textContent=nfINR.format(+tax.toFixed(2));
+      document.getElementById('grandTotal').textContent=nfINR.format(+grand.toFixed(2));
+      document.getElementById('amountPayable').textContent=nfINR.format(+net.toFixed(2));
+    }
+
+    function clearAll(){
+      if(!confirm('Clear all items and fields?')) return;
+      document.querySelector('#billTable tbody').innerHTML='';
+      document.getElementById('custName').value='';
+      document.getElementById('custAddress').value='';
+      document.getElementById('discount').value='0';
+      document.getElementById('invoiceNo').value=genInvoiceNo();
+      updateSerials();
+      updateTotals();
+    }
+
+    function exportCSV(){
+      const rows=[["Sr No.","Item Name","Quantity","Rate","GST %","Tax Amt","Line Total"]];
+      document.querySelectorAll('#billTable tbody tr').forEach((r)=>{
+        rows.push([
+          r.children[0].textContent,
+          r.children[1].textContent,
+          r.children[2].textContent,
+          r.children[3].textContent,
+          r.children[4].textContent,
+          r.children[5].textContent,
+          r.children[6].textContent
+        ]);
+      });
+      const totals=getNumbers();
+      rows.push([]);
+      rows.push(["Subtotal","","","","",'', totals.sub.toFixed(2)]);
+      rows.push(["Tax Total","","","","",'', totals.tax.toFixed(2)]);
+      rows.push(["Discount","","","","",'', (totals.discount||0).toFixed(2)]);
+      rows.push(["Grand Total","","","","",'', totals.net.toFixed(2)]);
+      const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const cust=(document.getElementById('custName').value.trim()||'bill').replace(/\s+/g,'_');
+      const date=document.getElementById('billDate').value||new Date().toISOString().split('T')[0];
+      const link=document.createElement('a');
+      link.href=URL.createObjectURL(blob);
+      link.download=`${cust}_${date}.csv`;
+      document.body.appendChild(link);link.click();link.remove();
+    }
+
+    function saveDraft(){
+      const data={
+        custName:document.getElementById('custName').value,
+        custAddress:document.getElementById('custAddress').value,
+        billDate:document.getElementById('billDate').value,
+        invoiceNo:document.getElementById('invoiceNo').value,
+        discount:document.getElementById('discount').value,
+        items:[...document.querySelectorAll('#billTable tbody tr')].map(r=>({
+          name:r.children[1].textContent,
+          qty:r.children[2].textContent,
+          rate:r.children[3].textContent,
+          gst:r.children[4].textContent
+        }))
+      };
+      localStorage.setItem('nks_draft', JSON.stringify(data));
+      alert('Draft saved on this device.');
+    }
+
+    function loadDraft(){
+      const raw=localStorage.getItem('nks_draft');
+      if(!raw){alert('No draft found on this device.');return;}
+      const d=JSON.parse(raw);
+      document.getElementById('custName').value=d.custName||'';
+      document.getElementById('custAddress').value=d.custAddress||'';
+      document.getElementById('billDate').value=d.billDate||'';
+      document.getElementById('invoiceNo').value=d.invoiceNo||genInvoiceNo();
+      document.getElementById('discount').value=d.discount||0;
+      document.querySelector('#billTable tbody').innerHTML='';
+      (d.items||[]).forEach(it=>{
+        const tr=document.createElement('tr');
+        const qty=it.qty||'0';
+        const q=parseFloat(qty)||0;
+        const rate=parseFloat(it.rate)||0;
+        const gst=parseFloat(it.gst)||0;
+        const base=q*rate; const tax=+(base*(gst/100)).toFixed(2); const total=+(base+tax).toFixed(2);
+        tr.innerHTML=`<td></td><td>${escapeHtml(it.name||'')}</td><td>${qty}</td><td>${rate.toFixed(2)}</td><td>${gst.toFixed(2)}</td><td>${tax.toFixed(2)}</td><td>${total.toFixed(2)}</td><td class='action-col'><button class='removeBtn' onclick='removeItem(this)'>Remove</button></td>`;
+        document.querySelector('#billTable tbody').appendChild(tr);
+      });
+      updateSerials();
+      updateTotals();
+      alert('Draft loaded.');
+    }
+
+    /* ---------- PRINT SUPPORT (robust + footer totals) ---------- */
+    function buildSimplePrint(){
+      const custName=(document.getElementById('custName').value||'').trim();
+      const custAddr=(document.getElementById('custAddress').value||'').trim();
+      const billDate=document.getElementById('billDate').value||new Date().toISOString().split('T')[0];
+      const invoiceNo=(document.getElementById('invoiceNo').value||'').trim();
+
+      // Top-right meta
+      document.getElementById('pCust').textContent = `Customer: ${custName || '-'} | Address: ${custAddr || '-'}`;
+      document.getElementById('pDateInv').textContent = `Date: ${billDate} | Invoice#: ${invoiceNo || '-'}`;
+
+      // Build a clean table for print with footer totals
+      const wrap=document.getElementById('pTableWrap');
+      wrap.innerHTML='';
+
+      const tbl=document.createElement('table');
+      const thead=document.createElement('thead');
+      const tbody=document.createElement('tbody');
+      const tfoot=document.createElement('tfoot');
+
+      thead.innerHTML = `
+        <tr>
+          <th>Sr No.</th>
+          <th>Item Name</th>
+          <th>Quantity</th>
+          <th>Rate</th>
+          <th>GST %</th>
+          <th>Tax Amt</th>
+          <th>Line Total</th>
+        </tr>`;
+
+      // rows from on-screen table
+      const rows=[...document.querySelectorAll('#billTable tbody tr')];
+      rows.forEach((r,i)=>{
+        const c = r.children;
+        const tr=document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td>${c[1]?.textContent ?? ''}</td>
+          <td>${c[2]?.textContent ?? ''}</td>
+          <td>${c[3]?.textContent ?? ''}</td>
+          <td>${c[4]?.textContent ?? ''}</td>
+          <td>${c[5]?.textContent ?? ''}</td>
+          <td>${c[6]?.textContent ?? ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // compute totals using existing logic
+      const {grand, net, discount} = getNumbers();
+
+      // footer with the three fields requested
+      tfoot.innerHTML = `
+        <tr>
+          <th colspan="6" style="text-align:right">Discount (₹)</th>
+          <th>${(discount||0).toFixed(2)}</th>
+        </tr>
+        <tr>
+          <th colspan="6" style="text-align:right">Grand Total (₹)</th>
+          <th>${(grand||0).toFixed(2)}</th>
+        </tr>
+        <tr>
+          <th colspan="6" style="text-align:right">Amount Payable (₹)</th>
+          <th>${(net||0).toFixed(2)}</th>
+        </tr>
+      `;
+
+      tbl.appendChild(thead);
+      tbl.appendChild(tbody);
+      tbl.appendChild(tfoot);
+      wrap.appendChild(tbl);
+    }
+
+    function prepareForPrint(){
+      updateTotals();
+      buildSimplePrint();
+    }
+
+    function printBill(){
+      prepareForPrint();   // build header + table + footer totals
+      window.print();      // sync call = best browser compatibility
+    }
+
+    // Extra safety hooks
+    window.addEventListener('beforeprint', prepareForPrint);
+    (function(){
+      const mql = window.matchMedia && window.matchMedia('print');
+      if(!mql) return;
+      const handler = (e)=>{ if(e.matches) prepareForPrint(); };
+      if(mql.addEventListener) mql.addEventListener('change', handler);
+      else if(mql.addListener) mql.addListener(handler);
+    })();
   </script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" referrerpolicy="no-referrer"></script>
   <script>
-    function saveAsPDF() {
-      const element = document.querySelector('.container');
-      const custName = document.getElementById('custName').value.trim() || 'bill';
-      const billDate = document.getElementById('billDate').value || new Date().toISOString().split('T')[0];
-      html2pdf().from(element).set({ margin:10, filename:`${custName}_${billDate}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'} }).save();
+    function saveAsPDF(){
+      const element=document.querySelector('.container');
+      const custName=(document.getElementById('custName').value.trim()||'bill').replace(/\s+/g,'_');
+      const billDate=document.getElementById('billDate').value||new Date().toISOString().split('T')[0];
+      const filename=`${custName}_${billDate}.pdf`;
+      html2pdf().from(element).set({
+        margin:10,
+        filename,
+        image:{type:'jpeg',quality:0.98},
+        html2canvas:{scale:2, useCORS:true},
+        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+      }).save();
     }
   </script>
 </body>
