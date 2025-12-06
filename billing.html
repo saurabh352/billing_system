@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billing System - Narayan Kirana Store</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1,h2,h3 { text-align: center; margin: 4px 0; }
+    .container { max-width: 900px; margin: auto; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    label { min-width: 60px; }
+    input, select { padding: 6px; margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table, th, td { border: 1px solid #333; }
+    th, td { padding: 10px; text-align: center; }
+    .btn { padding: 8px 14px; cursor: pointer; margin-top: 10px; }
+    .actions { margin-top: 12px; display:flex; gap:8px; justify-content:flex-end; }
+    @media print {
+      .no-print { display: none; }
+      body { margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Narayan Kirana Store Gyanpur</h1>
+    <h3>
+      <a href="https://wa.me/9935113436" target="_blank">📱 9935113436</a> |
+      <a href="https://wa.me/9935113340" target="_blank">📱 9935113340</a>
+    </h3>
+
+    <h2>Billing System</h2>
+
+    <h3>Customer Details</h3>
+    <div class="row">
+      <label for="custName">Name:</label>
+      <input type="text" id="custName" />
+
+      <label for="billDate">Date:</label>
+      <input type="date" id="billDate" />
+
+      <label for="custAddress">Address:</label>
+      <input type="text" id="custAddress" style="flex:1;" />
+    </div>
+
+    <h3>Add Item</h3>
+    <div class="row">
+      <label for="itemName">Item:</label>
+      <input type="text" id="itemName" />
+
+      <label for="qty">Qty:</label>
+      <input type="number" id="qty" min="0" step="any" style="width:100px;" />
+
+      <select id="unit">
+        <option value="kg">Kg</option>
+        <option value="gm">Gram</option>
+        <option value="packet">Packet</option>
+        <option value="piece">Piece</option>
+      </select>
+
+      <label for="rate">Rate:</label>
+      <input type="number" id="rate" min="0" step="any" style="width:120px;" />
+
+      <button class="btn" onclick="addItem()">Add</button>
+    </div>
+
+    <table id="billTable">
+      <thead>
+        <tr>
+          <th>Sr No.</th>
+          <th>Item Name</th>
+          <th>Quantity</th>
+          <th>Rate</th>
+          <th>Total</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="actions no-print">
+      <button class="btn" onclick="updateGrandTotal()">Calculate Total</button>
+      <button class="btn" onclick="window.print()">Print Bill</button>
+      <button class="btn" onclick="saveAsPDF()">Save as PDF</button>
+    </div>
+
+    <h3>Total Amount: <span id="grandTotal">0</span></h3>
+  </div>
+
+  <script>
+    (function setDate() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const el = document.getElementById('billDate');
+      if (el) el.value = `${yyyy}-${mm}-${dd}`;
+    })();
+
+    function addItem() {
+      const name = document.getElementById('itemName').value.trim();
+      const qtyVal = document.getElementById('qty').value;
+      const qty = parseFloat(qtyVal);
+      const unit = document.getElementById('unit').value;
+      const rateVal = document.getElementById('rate').value;
+      const rate = parseFloat(rateVal);
+
+      if (!name || isNaN(qty) || isNaN(rate)) {
+        alert('Please enter valid item name, quantity and rate');
+        return;
+      }
+
+      const total = +(qty * rate).toFixed(2);
+
+      const tableBody = document.querySelector('#billTable tbody');
+      const row = document.createElement('tr');
+
+      const srTd = document.createElement('td');
+      const nameTd = document.createElement('td');
+      const qtyTd = document.createElement('td');
+      const rateTd = document.createElement('td');
+      const totalTd = document.createElement('td');
+      const actionTd = document.createElement('td');
+
+      nameTd.textContent = name;
+      qtyTd.textContent = `${qty} ${unit}`;
+      rateTd.textContent = rate.toFixed(2);
+      totalTd.textContent = total.toFixed(2);
+      actionTd.innerHTML = "<button class='removeBtn' onclick='removeItem(this)'>Remove</button>";
+
+      row.appendChild(srTd);
+      row.appendChild(nameTd);
+      row.appendChild(qtyTd);
+      row.appendChild(rateTd);
+      row.appendChild(totalTd);
+      row.appendChild(actionTd);
+
+      tableBody.appendChild(row);
+
+      updateSerialNumbers();
+      updateGrandTotal();
+
+      document.getElementById('itemName').value = '';
+      document.getElementById('qty').value = '';
+      document.getElementById('rate').value = '';
+    }
+
+    function updateSerialNumbers() {
+      const rows = document.querySelectorAll('#billTable tbody tr');
+      let index = 1;
+      rows.forEach(r => {
+        r.children[0].textContent = index++;
+      });
+    }
+
+    function removeItem(btn) {
+      const row = btn.closest('tr');
+      if (!row) return;
+      if (!confirm('Remove this item?')) return;
+      row.remove();
+      updateSerialNumbers();
+      updateGrandTotal();
+    }
+
+    function updateGrandTotal() {
+      let total = 0;
+      document.querySelectorAll('#billTable tbody tr').forEach(row => {
+        const val = parseFloat(row.children[4].textContent) || 0;
+        total += val;
+      });
+      document.getElementById('grandTotal').textContent = total.toFixed(2);
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    function saveAsPDF() {
+      const element = document.querySelector('.container');
+      const opt = {
+        margin: 10,
+        filename: 'bill.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().from(element).set(opt).save();
+    }
+  </script>
+</body>
+</html>
