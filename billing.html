@@ -5,22 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Billing System - Narayan Kirana Store</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1,h2,h3 { text-align: center; margin: 4px 0; }
-    .container { max-width: 900px; margin: auto; }
-    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    label { min-width: 60px; }
-    input, select { padding: 6px; margin: 5px 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    table, th, td { border: 1px solid #333; }
-    th { background-color: #f2f2f2; }
-    th, td { padding: 10px; text-align: center; }
-    .btn { padding: 8px 14px; cursor: pointer; margin-top: 10px; }
-    .removeBtn { background-color: #e74c3c; color: white; border: none; padding: 5px 10px; cursor: pointer; }
-    .actions { margin-top: 12px; display:flex; gap:8px; justify-content:flex-end; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: linear-gradient(to right, #fceabb, #f8b500); }
+    .container { max-width: 1000px; margin: 20px auto; background: #fff; padding: 30px 40px; border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+    h1 { text-align: center; margin: 6px 0; color: #ff6f61; font-size: 32px; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
+    h3 { text-align: center; margin: 4px 0; color: #555; font-size: 18px; }
+    h2 { text-align: center; color: #007bff; margin: 12px 0; text-decoration: underline; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    label { min-width: 60px; font-weight: bold; color: #333; }
+    input, select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    input:focus, select:focus { outline: none; border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,0.5); }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    table, th, td { border: 1px solid #ccc; }
+    th { background: linear-gradient(to right, #4facfe, #00f2fe); color: #fff; font-size: 16px; }
+    th, td { padding: 12px; text-align: center; font-size: 15px; }
+    .btn { padding: 8px 16px; cursor: pointer; border: none; border-radius: 6px; transition: 0.3s; font-weight: bold; }
+    .btn:hover { opacity: 0.85; }
+    .removeBtn { background-color: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .removeBtn:hover { background-color: #c0392b; }
+    .actions { margin-top: 12px; display:flex; gap:10px; justify-content:flex-end; flex-wrap: wrap; }
 
-    /* Hide input rows and action column when printing or saving as PDF */
+    /* Responsive */
+    @media(max-width: 768px) {
+      .row { flex-direction: column; align-items: flex-start; }
+      input, select { width: 100%; }
+      .actions { justify-content: center; }
+    }
+
+    /* Print */
     @media print {
+      body { background: #fff; }
       .no-print, .add-item-row, .action-col { display: none; }
       body { margin: 0; }
     }
@@ -37,7 +50,7 @@
     <h2>Billing System</h2>
 
     <h3>Customer Details</h3>
-    <div class="row">
+    <div class="row" style="background: #f1f8ff; padding: 12px 10px; border-radius: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
       <label for="custName">Name:</label>
       <input type="text" id="custName" aria-label="Customer Name" />
 
@@ -59,6 +72,7 @@
       <select id="unit" aria-label="Unit">
         <option value="kg">Kg</option>
         <option value="gm">Gram</option>
+        <option value="liter">Liter</option>
         <option value="packet">Packet</option>
         <option value="piece">Piece</option>
       </select>
@@ -66,7 +80,7 @@
       <label for="rate">Rate:</label>
       <input type="number" id="rate" min="0" step="any" style="width:120px;" aria-label="Rate" />
 
-      <button class="btn" onclick="addItem()" aria-label="Add Item">Add</button>
+      <button class="btn" onclick="addItem()" aria-label="Add Item" style="background-color:#007bff;color:white;">Add</button>
     </div>
 
     <table id="billTable" aria-label="Billing Table">
@@ -84,9 +98,9 @@
     </table>
 
     <div class="actions no-print">
-      <button class="btn" onclick="updateGrandTotal()" aria-label="Calculate Total">Calculate Total</button>
-      <button class="btn" onclick="window.print()" aria-label="Print Bill">Print Bill</button>
-      <button class="btn" onclick="saveAsPDF()" aria-label="Save as PDF">Save as PDF</button>
+      <button class="btn" onclick="updateGrandTotal()" style="background:#28a745;color:white;">Calculate Total</button>
+      <button class="btn" onclick="window.print()" style="background:#17a2b8;color:white;">Print Bill</button>
+      <button class="btn" onclick="saveAsPDF()" style="background:#6f42c1;color:white;">Save as PDF</button>
     </div>
 
     <h3>Total Amount: <span id="grandTotal">0</span></h3>
@@ -103,6 +117,9 @@
     })();
 
     function addItem() {
+      const rows = document.querySelectorAll('#billTable tbody tr');
+      if (rows.length >= 50) { alert('Maximum 50 items allowed per bill.'); return; }
+
       const name = document.getElementById('itemName').value.trim();
       const qtyVal = document.getElementById('qty').value;
       const qty = parseFloat(qtyVal);
@@ -119,41 +136,31 @@
       const tableBody = document.querySelector('#billTable tbody');
       const row = document.createElement('tr');
 
-      const srTd = document.createElement('td');
-      const nameTd = document.createElement('td');
-      const qtyTd = document.createElement('td');
-      const rateTd = document.createElement('td');
-      const totalTd = document.createElement('td');
-      const actionTd = document.createElement('td');
-
-      nameTd.textContent = name;
-      qtyTd.textContent = `${qty} ${unit}`;
-      rateTd.textContent = rate.toFixed(2);
-      totalTd.textContent = total.toFixed(2);
-      actionTd.innerHTML = "<button class='removeBtn' onclick='removeItem(this)' aria-label='Remove Item'>Remove</button>";
-      actionTd.classList.add('action-col');
-
-      row.appendChild(srTd);
-      row.appendChild(nameTd);
-      row.appendChild(qtyTd);
-      row.appendChild(rateTd);
-      row.appendChild(totalTd);
-      row.appendChild(actionTd);
-
+      row.innerHTML = `
+        <td></td>
+        <td>${name}</td>
+        <td>${qty} ${unit}</td>
+        <td>${rate.toFixed(2)}</td>
+        <td>${total.toFixed(2)}</td>
+        <td class="action-col"><button class='removeBtn' onclick='removeItem(this)'>Remove</button></td>
+      `;
       tableBody.appendChild(row);
-
       updateSerialNumbers();
       updateGrandTotal();
 
       document.getElementById('itemName').value = '';
       document.getElementById('qty').value = '';
       document.getElementById('rate').value = '';
+      document.getElementById('itemName').focus();
     }
+
+    document.getElementById('rate').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') addItem();
+    });
 
     function updateSerialNumbers() {
       const rows = document.querySelectorAll('#billTable tbody tr');
-      let index = 1;
-      rows.forEach(r => { r.children[0].textContent = index++; });
+      rows.forEach((r, i) => { r.children[0].textContent = i + 1; });
     }
 
     function removeItem(btn) {
@@ -168,8 +175,7 @@
     function updateGrandTotal() {
       let total = 0;
       document.querySelectorAll('#billTable tbody tr').forEach(row => {
-        const val = parseFloat(row.children[4].textContent) || 0;
-        total += val;
+        total += parseFloat(row.children[4].textContent) || 0;
       });
       document.getElementById('grandTotal').textContent = total.toFixed(2);
     }
@@ -181,14 +187,13 @@
       const element = document.querySelector('.container');
       const custName = document.getElementById('custName').value.trim() || 'bill';
       const billDate = document.getElementById('billDate').value || new Date().toISOString().split('T')[0];
-      const opt = {
+      html2pdf().from(element).set({
         margin: 10,
         filename: `${custName}_${billDate}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-      html2pdf().from(element).set(opt).save();
+      }).save();
     }
   </script>
 </body>
