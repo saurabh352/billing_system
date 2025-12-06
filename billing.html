@@ -16,8 +16,10 @@
     th, td { padding: 10px; text-align: center; }
     .btn { padding: 8px 14px; cursor: pointer; margin-top: 10px; }
     .actions { margin-top: 12px; display:flex; gap:8px; justify-content:flex-end; }
+
+    /* Hide input rows when printing or saving as PDF */
     @media print {
-      .no-print { display: none; }
+      .no-print, .add-item-row { display: none; }
       body { margin: 0; }
     }
   </style>
@@ -45,7 +47,7 @@
     </div>
 
     <h3>Add Item</h3>
-    <div class="row">
+    <div class="row add-item-row">
       <label for="itemName">Item:</label>
       <input type="text" id="itemName" />
 
@@ -112,7 +114,6 @@
       }
 
       const total = +(qty * rate).toFixed(2);
-
       const tableBody = document.querySelector('#billTable tbody');
       const row = document.createElement('tr');
 
@@ -149,9 +150,7 @@
     function updateSerialNumbers() {
       const rows = document.querySelectorAll('#billTable tbody tr');
       let index = 1;
-      rows.forEach(r => {
-        r.children[0].textContent = index++;
-      });
+      rows.forEach(r => { r.children[0].textContent = index++; });
     }
 
     function removeItem(btn) {
