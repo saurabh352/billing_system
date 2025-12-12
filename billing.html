@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Billing System - Narayan Kirana Store (Suggestions + CAPS)</title>
+  <title>Billing System - Narayan Kirana Store (Fixed Print)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root{ --brand:#ff6f61;--primary:#007bff;--accent:#17a2b8;--success:#28a745;--warning:#f8b500;--purple:#6f42c1;--danger:#e74c3c;--ink:#333 }
     *{box-sizing:border-box}
@@ -32,28 +33,26 @@
     .totals .card{border:1px solid #eee;border-radius:10px;padding:10px;background:#fafafa}
     .right{text-align:right}
     .muted{color:#777}
-
-    /* Make key text inputs display in CAPITALS visually */
     .caps { text-transform: uppercase; letter-spacing: .5px; }
 
-    @media(max-width:768px){
-      .row{flex-direction:column;align-items:flex-start}
-      input,select{width:100%}
-      .actions{justify-content:center}
-    }
+    /* New CSS for Upload Section */
+    .upload-section { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
 
-    /* ---------- PRINT LAYOUT ---------- */
+    @media(max-width:768px){ .row{flex-direction:column;align-items:flex-start} input,select{width:100%} .actions{justify-content:center} }
+
+    /* PRINT LAYOUT */
     @media print{
       body{background:#fff;margin:0}
-      .no-print,.add-item-row,.action-col,.header-top a,.actions{display:none!important}
-      .container{width:210mm;min-height:297mm;padding:12mm 14mm}
+      /* Ensure no-print elements, especially the upload and actions, are hidden */
+      .no-print,.add-item-row,.action-col,.header-top a,.actions,.upload-section{display:none!important}
+      .container{width:210mm;min-height:297mm;padding:12mm 14mm;box-shadow:none!important;} /* Added box-shadow:none */
       table{font-size:11px}
       tr{page-break-inside:avoid}
       #invoiceHeader{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px}
       .totals .card{border:none;background:#fff;padding:0}
     }
 
-    /* Print-only area */
+    /* Print-only area styles (Simplified Bill) */
     #simplePrint{display:none}
     @media print{
       #simplePrint{display:block}
@@ -61,10 +60,8 @@
       body{background:#fff !important}
       .container{box-shadow:none !important;padding:0;margin:0}
 
-      #simplePrint{font-family:Arial, Helvetica, sans-serif;font-size:11px;padding:6mm 6mm}
+      #simplePrint{font-family:Arial, sans-serif;font-size:11px;padding:6mm 6mm}
       #simplePrint .print-header{ display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap }
-      #simplePrint .left{max-width:55%}
-      #simplePrint .right{max-width:45%; text-align:right}
       #simplePrint .muted{color:#333}
       #simplePrint table{width:100%;border-collapse:collapse;font-size:10px;margin-top:6mm;table-layout:auto}
       #simplePrint th,#simplePrint td{border:1px solid #000;padding:3px;text-align:center;vertical-align:top}
@@ -76,7 +73,6 @@
 </head>
 <body>
   <div class="container" id="billRoot">
-    <!-- SIMPLE PRINT-ONLY LAYOUT -->
     <div id="simplePrint">
       <div class="print-header">
         <div class="left">
@@ -93,70 +89,50 @@
       <div id="pTableWrap"></div>
     </div>
 
-    <!-- Normal screen header -->
     <div class="header-top">
       <div>GST No: <strong>09CXYPD4494C1ZZ</strong> | Address: Main Trimuhani, Gyanpur, Bhadohi</div>
       <div>Mobile: 9935113436, 9935113340</div>
     </div>
     <h1>Narayan Kirana Store</h1>
-    <h2>Billing System</h2>
+
+    <div class="upload-section no-print">
+      <label for="xlsxFile" style="min-width: unset;">Upload Inventory (XLSX):</label>
+      <input type="file" id="xlsxFile" accept=".xlsx, .xls" />
+      <span style="font-size: 11px; color: #856404;">Columns needed: Item Name, Sale Rate</span>
+    </div>
 
     <div id="invoiceHeader" class="pill">
       <div class="row" style="margin-bottom:0">
-        <div style="flex:1;display:flex;gap:8px;align-items:center">
-          <label for="custName">Name:</label>
-          <input type="text" id="custName" aria-label="Customer Name" class="caps" />
-        </div>
-        <div style="flex:2;display:flex;gap:8px;align-items:center">
-          <label for="custAddress">Address:</label>
-          <input type="text" id="custAddress" aria-label="Customer Address" style="flex:1" class="caps" />
-        </div>
-        <div style="flex:1;display:flex;gap:8px;align-items:center">
-          <label for="billDate">Date:</label>
-          <input type="date" id="billDate" aria-label="Bill Date" />
-        </div>
-        <div style="flex:1;display:flex;gap:8px;align-items:center">
-          <label for="invoiceNo">Invoice#</label>
-          <input type="text" id="invoiceNo" aria-label="Invoice Number" />
-        </div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center"><label for="custName">Name:</label><input type="text" id="custName" aria-label="Customer Name" class="caps" /></div>
+        <div style="flex:2;display:flex;gap:8px;align-items:center"><label for="custAddress">Address:</label><input type="text" id="custAddress" aria-label="Customer Address" style="flex:1" class="caps" /></div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center"><label for="billDate">Date:</label><input type="date" id="billDate" aria-label="Bill Date" /></div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center"><label for="invoiceNo">Inv#</label><input type="text" id="invoiceNo" aria-label="Invoice Number" /></div>
       </div>
     </div>
 
     <h3>Add Item</h3>
     <div class="row add-item-row">
       <label for="itemName">Item:</label>
-      <!-- Attach datalist for auto-suggestions -->
       <input type="text" id="itemName" aria-label="Item Name" class="caps" list="itemSuggestions" autocomplete="off" />
       <datalist id="itemSuggestions"></datalist>
 
       <label for="qty">Qty:</label>
-      <input type="number" id="qty" min="0" step="any" style="width:110px" aria-label="Quantity" />
+      <input type="number" id="qty" min="0" step="any" style="width:90px" aria-label="Quantity" />
       <select id="unit" aria-label="Unit">
-        <option value="kg">Kg</option>
-        <option value="gm">Gram</option>
-        <option value="liter">Liter</option>
-        <option value="ml">ML</option>
-        <option value="packet">Packet</option>
-        <option value="piece">Piece</option>
+        <option value="kg">Kg</option><option value="gm">Gram</option><option value="liter">Liter</option>
+        <option value="ml">ML</option><option value="packet">Packet</option><option value="piece">Piece</option>
       </select>
       <label for="rate">Rate:</label>
-      <input type="number" id="rate" min="0" step="any" style="width:120px" aria-label="Rate" placeholder="per unit" />
-      <label for="gst">GST %:</label>
-      <input type="number" id="gst" min="0" step="any" style="width:90px" aria-label="GST percent" placeholder="0/5/12/18/28" />
+      <input type="number" id="rate" min="0" step="any" style="width:110px" aria-label="Rate" placeholder="Sale Rate" />
+      <label for="gst">GST%:</label>
+      <input type="number" id="gst" min="0" value="0" style="width:70px" aria-label="GST percent" />
       <button class="btn" id="addBtn" style="background:var(--primary);color:#fff">Add</button>
     </div>
 
     <table id="billTable" aria-label="Billing Table">
       <thead>
         <tr>
-          <th>Sr No.</th>
-          <th>Item Name</th>
-          <th>Quantity</th>
-          <th>Rate</th>
-          <th>GST %</th>
-          <th>Tax Amt</th>
-          <th>Line Total</th>
-          <th class="action-col">Action</th>
+          <th>Sr No.</th><th>Item Name</th><th>Quantity</th><th>Rate</th><th>GST %</th><th>Tax Amt</th><th>Line Total</th><th class="action-col">Action</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -165,46 +141,26 @@
     <div class="totals">
       <div class="card"><div class="muted">Subtotal</div><div class="right" id="subTotal">₹0.00</div></div>
       <div class="card"><div class="muted">Total Tax</div><div class="right" id="taxTotal">₹0.00</div></div>
-      <div class="card"><div class="muted">Discount (₹)</div>
-        <input type="number" id="discount" min="0" step="any" value="0" style="width:100%" />
-      </div>
+      <div class="card"><div class="muted">Discount (₹)</div><input type="number" id="discount" value="0" style="width:100%" /></div>
       <div class="card"><div class="muted">Grand Total</div><div class="right" id="grandTotal">₹0.00</div></div>
     </div>
 
     <div class="actions no-print">
-      <button class="btn" id="calcBtn" style="background:var(--success);color:#fff">Calculate Total</button>
+      <button class="btn" id="calcBtn" style="background:var(--success);color:#fff">Calculate</button>
       <button class="btn" id="clearBtn" style="background:#999;color:#fff">Clear All</button>
-      <button class="btn" id="saveDraftBtn" style="background:var(--accent);color:#fff">Save Draft</button>
-      <button class="btn" id="loadDraftBtn" style="background:var(--warning);color:#222">Load Draft</button>
       <button class="btn" id="csvBtn" style="background:#222;color:#fff">Export CSV</button>
       <button class="btn" id="printBtn" onclick="printBill()" style="background:var(--accent);color:#fff" type="button">Print Bill</button>
-      <button class="btn" id="pdfBtn" style="background:var(--purple);color:#fff">Save as PDF</button>
+      <button class="btn" id="pdfBtn" style="background:var(--purple);color:#fff">Save PDF</button>
     </div>
-
-    <h3 class="right">Amount Payable: <span id="amountPayable">₹0.00</span></h3>
+    <h3 class="right">Payable: <span id="amountPayable">₹0.00</span></h3>
   </div>
 
   <script>
     const nfINR = new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'});
 
-    // ---- Item master with persistence + always UPPERCASE ----
-    const DEFAULT_ITEMS = [
-      'ATTA','MAIDA','BESAN','SUJI','POHA','MURMURA','SATTU','RICE','BASMATI RICE','SUGAR','JAGGERY (GUD)','SALT','SENDHA NAMAK','DAL ARHAR','DAL MOONG','DAL CHANA','DAL MASOOR','DAL URAD','CHANA WHOLE','RAJMA','KABULI CHANA','LOBIA','KALA CHANA','MAKHANA','SABUDANA','SOYA CHUNKS','OATS','CORNFLAKES','DALIA','VERMICELLI (SEWAI)','OIL MUSTARD','OIL REFINED','OIL COCONUT','OIL GROUNDNUT','OIL OLIVE','VANASPATI GHEE','DESI GHEE','HALDI POWDER','RED CHILLI POWDER','DHANIYA POWDER','JEERA','AJWAIN','METHI DANA','KASURI METHI','SARSON SEEDS','HING','ELAICHI','LAUNG','DALCHINI','TEJ PATTA','GARAM MASALA','KITCHEN KING MASALA','SAMBHAR MASALA','CHHOLE MASALA','PAV BHAJI MASALA','BIRYANI MASALA','CHAT MASALA','BLACK PEPPER','WHITE PEPPER','TANDOORI MASALA','CASHEW','ALMOND','PISTA','RAISINS','FIGS','DRY COCONUT','WALNUT','DATES','BREAD','BUN','RUSK','BISCUITS','COOKIES','NAMKEEN','CHIPS','KURKURE','POPCORN','CAKE RUSK','NOODLES','MAGGI','PASTA','MACARONI','PAPAD','PICKLE','TOMATO SAUCE','SCHEZWAN SAUCE','MAYONNAISE','VINEGAR','SOYA SAUCE','JAM','TEA','COFFEE','GREEN TEA','COLD DRINK','JUICE PACK','ENERGY DRINK','GLUCOSE','ORS','BADAM DRINK MIX','HOT CHOCOLATE','MILK','CURD','BUTTERMILK','BUTTER','CHEESE','PANEER','DETERGENT POWDER','DETERGENT LIQUID','SOAP BAR','DISHWASH BAR','DISHWASH LIQUID','PHENYL','BLEACH','HARPIC','GLASS CLEANER','FLOOR CLEANER','TOILET CLEANER','AIR FRESHENER','ROOM FRESHENER','NAPHTHALENE BALLS','GARBAGE BAGS','MOP','BROOM','BUCKET','MUG','SCRUBBER','STEEL SCRUB','CLOTH WIPER','SHAMPOO','CONDITIONER','HAIR OIL','BODY LOTION','TALCUM POWDER','FACE WASH','FACE CREAM','SHAVING CREAM','RAZOR','AFTERSHAVE','SANITIZER','SOAP','HANDWASH','BODY WASH','DEODORANT','PERFUME','LIP BALM','BABY SOAP','BABY SHAMPOO','BABY LOTION','BABY POWDER','BABY DIAPERS','MATCHBOX','LIGHTER','CANDLES','TORCH','BATTERIES','ALUMINIUM FOIL','CLING FILM','TISSUE ROLL','PAPER NAPKIN','FOIL CONTAINER','ZIPPER POUCH','COTTON','BANDAGE','BAND-AID','PAIN BALM','VAPORIZER','VICKS','OINTMENT','HOT WATER BAG','AGARBATTI','DHOOP','KAPOOR','PUJA OIL','ROLI','CHAWAL PUJA','DIYA','LONG MATCHES','NOTEBOOK','PENCIL','PEN','ERASER','SHARPNER','SCALE','MARKER','HIGHLIGHTER','GLUE','TAPE','STAPLER','STAPLER PINS','STEEL GLASS','STEEL PLATE','SPOON','LUNCH BOX','WATER BOTTLE','PLASTIC CONTAINER','STRAINER','KNIFE','CHOPPING BOARD','SIEVE','MASALA BOX','KESAR','VANILLA POWDER','SAINT','COLOUR GREEN','COLOUR YELLOW','CHANDI WORK','SILVER FOILS','GUD','KHARI'
-    ];
-
-    function loadItemMaster(){
-      try{
-        const saved = JSON.parse(localStorage.getItem('nks_items')||'[]');
-        const set = new Set([...(saved||[]), ...DEFAULT_ITEMS]);
-        return Array.from(set).sort();
-      }catch(e){ return [...DEFAULT_ITEMS].sort(); }
-    }
-
-    function saveItemMaster(list){
-      try{ localStorage.setItem('nks_items', JSON.stringify(list)); }catch(e){}
-    }
-
-    let ITEM_MASTER = loadItemMaster();
+    // Inventory state
+    let INVENTORY_MAP = {}; // To store Name -> Sale Rate mapping
+    let ITEM_MASTER = []; // To store list of item names for datalist
 
     function toCaps(v){ return (v||'').toString().toUpperCase(); }
 
@@ -213,228 +169,146 @@
       dl.innerHTML = ITEM_MASTER.map(x=>`<option value="${x}"></option>`).join('');
     }
 
+    // --- XLSX FILE HANDLING ---
+    document.getElementById('xlsxFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const sheetName = workbook.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        // Parse rows and update map
+        rows.forEach(row => {
+          const name = toCaps(row['Item Name'] || row['item name'] || '');
+          const rate = parseFloat(row['Sale Rate'] || row['sale rate'] || 0);
+          if(name) {
+            INVENTORY_MAP[name] = rate;
+            if(!ITEM_MASTER.includes(name)) ITEM_MASTER.push(name);
+          }
+        });
+
+        ITEM_MASTER.sort();
+        localStorage.setItem('nks_inventory_map', JSON.stringify(INVENTORY_MAP));
+        localStorage.setItem('nks_items', JSON.stringify(ITEM_MASTER));
+        refreshSuggestions();
+        alert("Inventory updated successfully!");
+        document.getElementById('xlsxFile').value = ''; // Clear file input
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    // --- AUTO-FILL RATE ON ITEM SELECT ---
+    document.getElementById('itemName').addEventListener('input', function() {
+      const val = toCaps(this.value);
+      if(INVENTORY_MAP[val]) {
+        document.getElementById('rate').value = INVENTORY_MAP[val];
+      }
+    });
+
     (function init(){
       const d=new Date();
-      const yyyy=d.getFullYear();
-      const mm=String(d.getMonth()+1).padStart(2,'0');
-      const dd=String(d.getDate()).padStart(2,'0');
-      document.getElementById('billDate').value=`${yyyy}-${mm}-${dd}`;
-      document.getElementById('invoiceNo').value = genInvoiceNo();
+      document.getElementById('billDate').value=d.toISOString().split('T')[0];
+      document.getElementById('invoiceNo').value = "INV-" + Date.now().toString().slice(-6);
+
+      // Load saved inventory from storage
+      try {
+        INVENTORY_MAP = JSON.parse(localStorage.getItem('nks_inventory_map') || '{}');
+        ITEM_MASTER = JSON.parse(localStorage.getItem('nks_items') || '[]');
+      } catch(e) {}
+
       refreshSuggestions();
       bindEvents();
     })();
 
-    function genInvoiceNo(){
-      const d=new Date();
-      const y=String(d.getFullYear()).slice(-2);
-      const m=String(d.getMonth()+1).padStart(2,'0');
-      const da=String(d.getDate()).padStart(2,'0');
-      const r=Math.floor(100+Math.random()*900);
-      return `INV-${y}${m}${da}-${r}`;
-    }
-
     function bindEvents(){
       document.getElementById('addBtn').addEventListener('click', addItem);
-      document.getElementById('rate').addEventListener('keypress', e=>{ if(e.key==='Enter') addItem(); });
-      document.getElementById('gst').addEventListener('keypress', e=>{ if(e.key==='Enter') addItem(); });
       document.getElementById('calcBtn').addEventListener('click', updateTotals);
       document.getElementById('discount').addEventListener('input', updateTotals);
-      document.getElementById('clearBtn').addEventListener('click', clearAll);
-      document.getElementById('csvBtn').addEventListener('click', exportCSV);
-      document.getElementById('pdfBtn').addEventListener('click', saveAsPDF);
-      document.getElementById('saveDraftBtn').addEventListener('click', saveDraft);
-      document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
+      document.getElementById('clearBtn').addEventListener('click', () => { if(confirm('Clear all data?')) location.reload(); });
 
-      // Keep certain inputs in real-time CAPITAL letters (value, not just visual)
       ['itemName','custName','custAddress'].forEach(id =>{
         const el = document.getElementById(id);
         el.addEventListener('input', ()=>{ el.value = toCaps(el.value); });
       });
 
-      // Keyboard shortcuts
-      window.addEventListener('keydown', (e)=>{
-        if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){e.preventDefault(); saveAsPDF();}
-        if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='p'){e.preventDefault(); printBill(); }
-      });
+      document.getElementById('pdfBtn').addEventListener('click', saveAsPDF);
+      document.getElementById('csvBtn').addEventListener('click', exportCSV); // Re-binding CSV
     }
 
     function addItem(){
-      const rows=document.querySelectorAll('#billTable tbody tr');
-      if(rows.length>=200){alert('Maximum 200 items allowed per bill.');return;}
       const name=toCaps(document.getElementById('itemName').value.trim());
       const qty=parseFloat(document.getElementById('qty').value);
       const unit=document.getElementById('unit').value;
       const rate=parseFloat(document.getElementById('rate').value);
       const gst=parseFloat(document.getElementById('gst').value||'0');
 
-      if(!name||isNaN(qty)||isNaN(rate)||qty<=0||rate<=0){alert('Enter valid item, quantity, and rate');return;}
-      if(gst<0){alert('GST% cannot be negative');return;}
+      if(!name||isNaN(qty)||isNaN(rate)||qty<=0){alert('Invalid data');return;}
 
       const lineBase = qty*rate;
       const taxAmt = +(lineBase * (gst/100)).toFixed(2);
       const lineTotal = +(lineBase + taxAmt).toFixed(2);
 
       const tr=document.createElement('tr');
-      tr.innerHTML = `
-        <td></td>
-        <td>${escapeHtml(name)}</td>
-        <td>${qty} ${unit}</td>
-        <td>${rate.toFixed(2)}</td>
-        <td>${gst.toFixed(2)}</td>
-        <td>${taxAmt.toFixed(2)}</td>
-        <td>${lineTotal.toFixed(2)}</td>
+      // Store raw rate/tax values as data attributes for easier printing calculation
+      tr.setAttribute('data-qty', qty);
+      tr.setAttribute('data-rate', rate);
+      tr.setAttribute('data-gst', gst);
+
+      tr.innerHTML = `<td></td><td>${name}</td><td>${qty} ${unit}</td><td>${rate.toFixed(2)}</td>
+        <td>${gst}</td><td>${taxAmt.toFixed(2)}</td><td>${lineTotal}</td>
         <td class="action-col"><button class="removeBtn" onclick="removeItem(this)">Remove</button></td>`;
       document.querySelector('#billTable tbody').appendChild(tr);
 
-      // learn this item into master (persist)
-      if(name && !ITEM_MASTER.includes(name)){
-        ITEM_MASTER.push(name);
-        ITEM_MASTER = Array.from(new Set(ITEM_MASTER)).sort();
-        saveItemMaster(ITEM_MASTER);
-        refreshSuggestions();
-      }
-
-      updateSerials();
-      updateTotals();
-      document.getElementById('itemName').value='';
-      document.getElementById('qty').value='';
+      updateSerials(); updateTotals();
+      document.getElementById('itemName').value=''; document.getElementById('qty').value='';
       document.getElementById('rate').value='';
-      document.getElementById('gst').value='';
       document.getElementById('itemName').focus();
     }
 
-    function escapeHtml(str){
-      return str.replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    // Helper function for safe removal
+    function removeItem(btn){
+      btn.closest('tr').remove();
+      updateSerials();
+      updateTotals();
     }
+
 
     function updateSerials(){
       document.querySelectorAll('#billTable tbody tr').forEach((r,i)=>r.children[0].textContent=i+1);
     }
 
-    function removeItem(btn){
-      const row=btn.closest('tr');
-      if(!row) return;
-      if(!confirm('Remove this item?')) return;
-      row.remove();
-      updateSerials();
-      updateTotals();
-    }
-
+    // Function to calculate all totals
     function getNumbers(){
-      let sub=0,tax=0,grand=0;
-      document.querySelectorAll('#billTable tbody tr').forEach(r=>{
-        const rate=parseFloat(r.children[3].textContent)||0;
-        const gst=parseFloat(r.children[4].textContent)||0;
-        const qtyUnit=r.children[2].textContent.trim();
-        const qty=parseFloat(qtyUnit.split(' ')[0])||0;
-        const base=qty*rate;
-        const t=base*(gst/100);
-        sub+=base; tax+=t; grand+=base+t;
-      });
-      const discount=parseFloat(document.getElementById('discount').value||'0');
-      if(discount>grand) return {sub,tax,grand:0,discount,net:0};
-      const net = Math.max(0, grand - discount);
-      return {sub,tax,grand,discount,net};
+        let sub=0, tax=0, grand=0;
+        document.querySelectorAll('#billTable tbody tr').forEach(r=>{
+            // Use cell content for existing rows (safer in this structure)
+            const rate=parseFloat(r.children[3].textContent)||0;
+            const gst=parseFloat(r.children[4].textContent)||0;
+            const qtyUnit=r.children[2].textContent.trim();
+            const qty=parseFloat(qtyUnit.split(' ')[0])||0;
+
+            const base=qty*rate;
+            const t=base*(gst/100);
+            sub+=base; tax+=t; grand+=base+t;
+        });
+        const discount=parseFloat(document.getElementById('discount').value||'0');
+        const net = Math.max(0, grand - discount);
+        return {sub: +sub.toFixed(2), tax: +tax.toFixed(2), grand: +grand.toFixed(2), discount: +discount.toFixed(2), net: +net.toFixed(2)};
     }
 
     function updateTotals(){
       const {sub,tax,grand,discount,net}=getNumbers();
-      document.getElementById('subTotal').textContent=nfINR.format(+sub.toFixed(2));
-      document.getElementById('taxTotal').textContent=nfINR.format(+tax.toFixed(2));
-      document.getElementById('grandTotal').textContent=nfINR.format(+grand.toFixed(2));
-      document.getElementById('amountPayable').textContent=nfINR.format(+net.toFixed(2));
+      document.getElementById('subTotal').textContent = nfINR.format(sub);
+      document.getElementById('taxTotal').textContent = nfINR.format(tax);
+      document.getElementById('grandTotal').textContent = nfINR.format(grand);
+      document.getElementById('amountPayable').textContent = nfINR.format(net);
     }
 
-    function clearAll(){
-      if(!confirm('Clear all items and fields?')) return;
-      document.querySelector('#billTable tbody').innerHTML='';
-      document.getElementById('custName').value='';
-      document.getElementById('custAddress').value='';
-      document.getElementById('discount').value='0';
-      document.getElementById('invoiceNo').value=genInvoiceNo();
-      updateSerials();
-      updateTotals();
-    }
+    // --- PRINT SUPPORT FUNCTIONS (FIXED) ---
 
-    function exportCSV(){
-      const rows=[["Sr No.","Item Name","Quantity","Rate","GST %","Tax Amt","Line Total"]];
-      document.querySelectorAll('#billTable tbody tr').forEach((r)=>{
-        rows.push([
-          r.children[0].textContent,
-          r.children[1].textContent,
-          r.children[2].textContent,
-          r.children[3].textContent,
-          r.children[4].textContent,
-          r.children[5].textContent,
-          r.children[6].textContent
-        ]);
-      });
-      const totals=getNumbers();
-      rows.push([]);
-      rows.push(["Subtotal","","","","",'', totals.sub.toFixed(2)]);
-      rows.push(["Tax Total","","","","",'', totals.tax.toFixed(2)]);
-      rows.push(["Discount","","","","",'', (totals.discount||0).toFixed(2)]);
-      rows.push(["Grand Total","","","","",'', totals.net.toFixed(2)]);
-      const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
-      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-      const cust=(document.getElementById('custName').value.trim()||'bill').replace(/\s+/g,'_');
-      const date=document.getElementById('billDate').value||new Date().toISOString().split('T')[0];
-      const link=document.createElement('a');
-      link.href=URL.createObjectURL(blob);
-      link.download=`${cust}_${date}.csv`;
-      document.body.appendChild(link);link.click();link.remove();
-    }
-
-    function saveDraft(){
-      const data={
-        custName:document.getElementById('custName').value,
-        custAddress:document.getElementById('custAddress').value,
-        billDate:document.getElementById('billDate').value,
-        invoiceNo:document.getElementById('invoiceNo').value,
-        discount:document.getElementById('discount').value,
-        items:[...document.querySelectorAll('#billTable tbody tr')].map(r=>({
-          name:r.children[1].textContent,
-          qty:r.children[2].textContent,
-          rate:r.children[3].textContent,
-          gst:r.children[4].textContent
-        }))
-      };
-      localStorage.setItem('nks_draft', JSON.stringify(data));
-      alert('Draft saved on this device.');
-    }
-
-    function loadDraft(){
-      const raw=localStorage.getItem('nks_draft');
-      if(!raw){alert('No draft found on this device.');return;}
-      const d=JSON.parse(raw);
-      document.getElementById('custName').value=toCaps(d.custName||'');
-      document.getElementById('custAddress').value=toCaps(d.custAddress||'');
-      document.getElementById('billDate').value=d.billDate||'';
-      document.getElementById('invoiceNo').value=d.invoiceNo||genInvoiceNo();
-      document.getElementById('discount').value=d.discount||0;
-      document.querySelector('#billTable tbody').innerHTML='';
-      (d.items||[]).forEach(it=>{
-        const tr=document.createElement('tr');
-        const qty=it.qty||'0';
-        const q=parseFloat(qty)||0;
-        const rate=parseFloat(it.rate)||0;
-        const gst=parseFloat(it.gst)||0;
-        const base=q*rate; const tax=+(base*(gst/100)).toFixed(2); const total=+(base+tax).toFixed(2);
-        tr.innerHTML=`<td></td><td>${escapeHtml(toCaps(it.name||''))}</td><td>${qty}</td><td>${rate.toFixed(2)}</td><td>${gst.toFixed(2)}</td><td>${tax.toFixed(2)}</td><td>${total.toFixed(2)}</td><td class='action-col'><button class='removeBtn' onclick='removeItem(this)'>Remove</button></td>`;
-        document.querySelector('#billTable tbody').appendChild(tr);
-        // learn loaded items as well
-        const nm = toCaps(it.name||'');
-        if(nm && !ITEM_MASTER.includes(nm)) ITEM_MASTER.push(nm);
-      });
-      ITEM_MASTER = Array.from(new Set(ITEM_MASTER)).sort();
-      saveItemMaster(ITEM_MASTER);
-      refreshSuggestions();
-      updateSerials();
-      updateTotals();
-      alert('Draft loaded.');
-    }
-
-    /* ---------- PRINT SUPPORT (robust + footer totals) ---------- */
     function buildSimplePrint(){
       const custName=toCaps((document.getElementById('custName').value||'').trim());
       const custAddr=toCaps((document.getElementById('custAddress').value||'').trim());
@@ -454,13 +328,8 @@
 
       thead.innerHTML = `
         <tr>
-          <th>Sr No.</th>
-          <th>Item Name</th>
-          <th>Quantity</th>
-          <th>Rate</th>
-          <th>GST %</th>
-          <th>Tax Amt</th>
-          <th>Line Total</th>
+          <th>Sr No.</th><th>Item Name</th><th>Quantity</th><th>Rate</th>
+          <th>GST %</th><th>Tax Amt</th><th>Line Total</th>
         </tr>`;
 
       const rows=[...document.querySelectorAll('#billTable tbody tr')];
@@ -469,7 +338,7 @@
         const tr=document.createElement('tr');
         tr.innerHTML = `
           <td>${i+1}</td>
-          <td>${c[1]?.textContent ?? ''}</td>
+          <td style="text-align:left">${c[1]?.textContent ?? ''}</td>
           <td>${c[2]?.textContent ?? ''}</td>
           <td>${c[3]?.textContent ?? ''}</td>
           <td>${c[4]?.textContent ?? ''}</td>
@@ -484,15 +353,15 @@
       tfoot.innerHTML = `
         <tr>
           <th colspan="6" style="text-align:right">Discount (₹)</th>
-          <th>${(discount||0).toFixed(2)}</th>
+          <th>${(discount).toFixed(2)}</th>
         </tr>
         <tr>
           <th colspan="6" style="text-align:right">Grand Total (₹)</th>
-          <th>${(grand||0).toFixed(2)}</th>
+          <th>${(grand).toFixed(2)}</th>
         </tr>
         <tr>
           <th colspan="6" style="text-align:right">Amount Payable (₹)</th>
-          <th>${(net||0).toFixed(2)}</th>
+          <th>${(net).toFixed(2)}</th>
         </tr>
       `;
 
@@ -503,8 +372,8 @@
     }
 
     function prepareForPrint(){
-      updateTotals();
-      buildSimplePrint();
+      updateTotals(); // Ensure latest totals are calculated
+      buildSimplePrint(); // Build the print-only structure
     }
 
     function printBill(){
@@ -512,31 +381,65 @@
       window.print();
     }
 
+    // Re-bind to ensure pre-print actions are taken
     window.addEventListener('beforeprint', prepareForPrint);
-    (function(){
-      const mql = window.matchMedia && window.matchMedia('print');
-      if(!mql) return;
-      const handler = (e)=>{ if(e.matches) prepareForPrint(); };
-      if(mql.addEventListener) mql.addEventListener('change', handler);
-      else if(mql.addListener) mql.addListener(handler);
-    })();
-  </script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" referrerpolicy="no-referrer"></script>
-  <script>
+
+    // --- CSV & PDF FUNCTIONS ---
+    function exportCSV(){
+      const rows=[["Sr No.","Item Name","Quantity","Rate","GST %","Tax Amt","Line Total"]];
+      document.querySelectorAll('#billTable tbody tr').forEach((r)=>{
+        rows.push([
+          r.children[0].textContent,r.children[1].textContent,r.children[2].textContent,
+          r.children[3].textContent,r.children[4].textContent,r.children[5].textContent,
+          r.children[6].textContent
+        ]);
+      });
+      const totals=getNumbers();
+      rows.push([]);
+      rows.push(["Subtotal","","","","",'', totals.sub.toFixed(2)]);
+      rows.push(["Tax Total","","","","",'', totals.tax.toFixed(2)]);
+      rows.push(["Discount","","","","",'', totals.discount.toFixed(2)]);
+      rows.push(["Grand Total","","","","",'', totals.net.toFixed(2)]);
+      const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const cust=(document.getElementById('custName').value.trim()||'bill').replace(/\s+/g,'_');
+      const date=document.getElementById('billDate').value||new Date().toISOString().split('T')[0];
+      const link=document.createElement('a');
+      link.href=URL.createObjectURL(blob);
+      link.download=`${cust}_${date}.csv`;
+      document.body.appendChild(link);link.click();link.remove();
+    }
+
     function saveAsPDF(){
-      const element=document.querySelector('.container');
+      prepareForPrint(); // Ensure the print area is ready for PDF conversion
+      const element=document.querySelector('#simplePrint'); // Target the print area for cleaner PDF
       const custName=(document.getElementById('custName').value.trim()||'bill').replace(/\s+/g,'_');
       const billDate=document.getElementById('billDate').value||new Date().toISOString().split('T')[0];
       const filename=`${custName}_${billDate}.pdf`;
+
+      // Temporarily show the simplePrint div for html2pdf to process it correctly
+      const billRoot = document.getElementById('billRoot');
+      const simplePrint = document.getElementById('simplePrint');
+      const originalDisplay = simplePrint.style.display;
+      simplePrint.style.display = 'block';
+      billRoot.style.boxShadow = 'none';
+
       html2pdf().from(element).set({
         margin:10,
         filename,
         image:{type:'jpeg',quality:0.98},
         html2canvas:{scale:2, useCORS:true},
         jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-      }).save();
+      }).save().then(()=>{
+          // Restore original display state after PDF generation is complete
+          simplePrint.style.display = originalDisplay;
+          billRoot.style.boxShadow = '';
+      });
     }
+
   </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" referrerpolicy="no-referrer"></script>
 </body>
 </html>
